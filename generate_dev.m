@@ -2,11 +2,12 @@
 
 % Folder used
 Dir = '~/Documents/hidden_images/';
-FileBase = input('Name your file ','s');
+% FileBase = input('Name your file ','s');
+FileBase = 'gray_';
 MaskFile = [Dir 'mask/' FileBase];
 
 % Create blank map
-ImSz = [20, 20];
+ImSz = [300, 300];
 Mask = zeros([ImSz, 3]);
 
 imwrite(Mask(:,:,1), [MaskFile 'R.png'],'png')
@@ -20,42 +21,47 @@ Mask(:,:,1) = imread([MaskFile 'R.png'],'png');
 Mask(:,:,2) = imread([MaskFile 'G.png'],'png');
 Mask(:,:,3) = imread([MaskFile 'B.png'],'png');
 
-Se = strel('square',3);
-MaskPerim = imdilate(Mask, Se) - Mask;
+fgSF = cat(3,0.75,0.75,0.85);
+bgSF = cat(3,0.25,0.25,0.15);
 
-Noise = randi(127, [ImSz 3])*2;
+Noise = zeros(ImSz);%randi(255, [ImSz 3]).*bgSF;
 
-FGR = 55;
-FGpx = (Mask~=0) .* (255 - FGR + randi(FGR,[ImSz 3]));
-BGpx = (MaskPerim~=0) .* randi(FGR,[ImSz 3]);
-Image = uint8(Noise .* ~imdilate(Mask, Se) + FGpx + BGpx);
+FGpx = (Mask .* fgSF + Noise);
+Image = uint8(Noise + FGpx);
+
+plotCMY = false;
+
+n_plots = 2 + plotCMY;
 
 figure(1)
-subplot(3,1,1)
+subplot(n_plots,1,1)
 imagesc(Image,[1 255])
 axis image
 title('colour')
-subplot(3,3,4)
+subplot(n_plots,3,4)
 imagesc(Image(:,:,1),[1 255])
 axis image, colormap gray
 title('Red light')
-subplot(3,3,5)
+subplot(n_plots,3,5)
 imagesc(Image(:,:,2),[1 255])
 axis image, colormap gray
 title('Green light')
-subplot(3,3,6)
+subplot(n_plots,3,6)
 imagesc(Image(:,:,3),[1 255])
 axis image, colormap gray
 title('Blue light')
-subplot(3,3,7)
-imagesc(sum(Image(:,:,[1 2]),3)/2, [1 255])
-axis image, colormap gray
-title('Yellow light')
-subplot(3,3,8)
-imagesc(sum(Image(:,:,[1 3]),3)/2, [1 255])
-axis image, colormap gray
-title('Magenta light')
-subplot(3,3,9)
-imagesc(sum(Image(:,:,[2 3]),3)/2, [1 255])
-axis image, colormap gray
-title('Cyan light')
+
+if plotCMY
+    subplot(n_plots,3,7)
+    imagesc(sum(Image(:,:,[1 2]),3)/2, [1 255])
+    axis image, colormap gray
+    title('Yellow light')
+    subplot(n_plots,3,8)
+    imagesc(sum(Image(:,:,[1 3]),3)/2, [1 255])
+    axis image, colormap gray
+    title('Magenta light')
+    subplot(n_plots,3,9)
+    imagesc(sum(Image(:,:,[2 3]),3)/2, [1 255])
+    axis image, colormap gray
+    title('Cyan light')
+end
