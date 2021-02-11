@@ -1,23 +1,30 @@
 #include "DHT.h"
 
+// DHT 11s are on pins 2 and 3
 #define DHTTYPE DHT11
 #define DHTPIN 2
-
-#define BUFSZ 6
-
 DHT dht(DHTPIN, DHTTYPE);
+// Number of readings to buffer
+#define BUFSZ 6
+// Working variables
 float tempBuff[BUFSZ];
 float humBuff[BUFSZ];
 float tNow;
 float hNow;
 int buffCont = 0;
+
+// Relays are on pins 5 to 8
 const int ledPin = 5;
 int ledState = 0;
+
+// Thermostat
 float highTemp = 16.0;
 
 void setup() {
-  // put your setup code here, to run once:
+  // Open serial port at baud rate:
   Serial.begin(9600);
+}
+  
   Serial.println(F("DHTxx buffered test!"));
   
   pinMode(ledPin, OUTPUT);
