@@ -136,4 +136,6 @@ if (Serial.available() > 0)
 OpenFile();
 WriteLine();
 CloseFile();
+
+delay(2000);
 }
