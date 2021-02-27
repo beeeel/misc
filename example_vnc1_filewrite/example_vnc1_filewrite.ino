@@ -137,5 +137,5 @@ OpenFile();
 WriteLine();
 CloseFile();
 
-delay(2000);
+delay(20000);
 }
