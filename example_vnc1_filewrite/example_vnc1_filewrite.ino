@@ -13,7 +13,9 @@ byte charIn;
 float tNow = 10.25;
 float hNow = 50.75;
 long int x, valToWrite;
-int noOfChars;
+int noOfChars, noOfnoOfChars;
+
+char* strBuf[100]; // Assume I'm never gonna exceed 100 chars at once
 
 void setup() {
 pinMode(RTSPin, INPUT);
@@ -43,20 +45,58 @@ digitalWrite(CTSPin, LOW);
 
 }
 
+void Tee(char* val[], int nChar){
+// Assume it's fine to write to USB and serial
+for (int i = 0; i < nChar; i++)
+{
+  usb.print(val[i]);
+  Serial.print(val[i]);
+} 
+}
+
+void Buff(char* str[], int nChar){
+  for (int i = 0; i < nChar; i++)
+  {
+    strBuf[i] = str[i];
+  }
+}
+
+void TeeInt(int val){
+  // For Teeing an int
+  usb.print(val);
+  Serial.print(val);
+}
+
 void OpenFile()
 {
-	usb.print("OPW LOG.CSV");               // open to write creates a file or appends to existing
-	usb.print(13);                    // return character
+  while (digitalRead(RTSPin) == HIGH) { }
+  // This next bit is horrible: The address-of turns the const char into char ** with only a warning from compile.
+  Buff(*"OPW LOG.CSV", 11);
+  strBuf[11] = 13;
+  Tee(strBuf, 12);
+  
+	//usb.print("OPW LOG.CSV");               // open to write creates a file or appends to existing
+	//usb.print(13);                    // return character
+ digitalWrite(CTSPin, LOW);
+
 }
 
 void CloseFile()
 {
-	usb.print("CLF LOG.CSV");  // it closes the file
-	usb.print(13);       // return character
+  while (digitalRead(RTSPin) == HIGH) { }
+  Buff(*"CLF LOG.CSV",11);
+  strBuf[11] = 13;
+  Tee(strBuf, 12);
+  
+	//usb.print("CLF LOG.CSV");  // it closes the file
+	//usb.print(13);       // return character
+  digitalWrite(CTSPin, LOW);
+
 }
 
 void WriteLine()
 {
+  while (digitalRead(RTSPin) == HIGH) { }
 	valToWrite=millis(); // time since we started logging
 	noOfChars=1;
 	x=valToWrite;                    // need to copy valToWrite as getting no of characters will consume it
@@ -68,19 +108,33 @@ void WriteLine()
 
 	noOfChars += 7;                  // Need to also write temp XX, hum XX, 2 "," and CR
 
-	usb.print("WRF ");               //write to file (file needs to have been opened to write first)
-	usb.print(noOfChars);            //needs to then be told how many characters will be written
-	usb.print(13);             	 //return to say command is finished
+  Tee(*"WRF ", 4);
+  TeeInt(noOfChars);
+  strBuf[0] = 13;
+  Tee(strBuf, 1);
+  TeeInt(valToWrite);
+  Tee(*",", 1);
+  TeeInt((int)(tNow+0.5));
+  Tee(*",",1);
+  TeeInt((int)(hNow+0.5));
+  strBuf[0] = 13;
+  Tee(strBuf,1);
+  
+	//usb.print("WRF ");               //write to file (file needs to have been opened to write first)
+	//usb.print(noOfChars);            //needs to then be told how many characters will be written
+	//usb.print(13);             	 //return to say command is finished
 
-	usb.print(valToWrite);
-	usb.print(",");
-	usb.print((int)(tNow+0.5));
-	usb.print(",");
-	usb.print((int)(hNow+0.5));
-	usb.print(13);             //write a return to the contents of the file (so each entry appears on a new line)
+	//usb.print(valToWrite);
+	//usb.print(",");
+	//usb.print((int)(tNow+0.5));
+	//usb.print(",");
+	//usb.print((int)(hNow+0.5));
+	//usb.print(13);             //write a return to the contents of the file (so each entry appears on a new line)
 
 	tNow++;		// Increment t and h because this is a test
 	hNow++;
+ digitalWrite(CTSPin, LOW);
+
 }
 
 void loop() {
