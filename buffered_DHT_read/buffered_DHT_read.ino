@@ -5,7 +5,7 @@
 #define DHTPIN 2
 DHT dht(DHTPIN, DHTTYPE);
 // Number of readings to buffer
-#define BUFSZ 6
+#define BUFSZ 150
 // Working variables
 float tempBuff[BUFSZ];
 float humBuff[BUFSZ];
@@ -18,7 +18,8 @@ const int ledPin = 5;
 int ledState = 0;
 
 // Thermostat
-float highTemp = 16.0;
+float highTemp = 22.0;
+float lowTemp = 18.0;
 
 void setup() {
   // Open serial port at baud rate:
@@ -37,21 +38,31 @@ void loop() {
 
   // Get readings into buffer
   do {
-    delay(2000);
-    readDHTtoBuff(&tempBuff[buffCont], &humBuff[buffCont]);
-    doThermostat(tempBuff[buffCont]);
+    // Do 6 readings and only keep the last one
     buffCont += 1;
+
+    for ( int i = 0; i < 6 ; i++ )
+    {
+
+      readDHTtoBuff(&tempBuff[buffCont], &humBuff[buffCont]);
+      doThermostat(tempBuff[buffCont]);
+      writeBufftoSerial(tempBuff, humBuff);
+
+    }
+
+    delay(2000);
+
   } while ( buffCont < BUFSZ );
+
   buffCont = 0;
-
-  writeBufftoSerial(tempBuff, humBuff);
-
+  
 }
 
 void readDHTtoBuff(float* tBuff, float* hBuff) {
   // Read the DHT and buffer the result
   tNow = 0.0;
   tNow = dht.readTemperature();
+  // Local tBuff is correct address in buffer
   tBuff[0] = tNow;
   hNow = 0.0;
   hNow = dht.readHumidity();
@@ -59,9 +70,11 @@ void readDHTtoBuff(float* tBuff, float* hBuff) {
 }
 
 void writeBufftoSerial(float* tBuff, float* hBuff) {
-    for (int i = 0; i < BUFSZ; i++) {
-      Serial.print(F("Temperature "));
-      Serial.print(i);
+    for (int i = 0; i < buffCont ; i++) {
+      Serial.print(2 * (buffCont - I) );
+      Serial.print(F(" Minutes ago "));
+      Serial.print(F("Temp "));
+      //Serial.print(i);
       Serial.print(F(" = "));
       Serial.print(tBuff[i]);
       Serial.print(F("°C   Humidity = "));
@@ -71,10 +84,16 @@ void writeBufftoSerial(float* tBuff, float* hBuff) {
 }
 
 void doThermostat(float tNow) {
-  if (tNow > highTemp) {
+  if (tNow > highTemp) 
+  {
     ledState = 128;
   }
-  else {
+  elseif (tNow > lowTemp)
+  {
+    ledState = 64;
+  }
+  else 
+  {
     ledState = 0;
   }
   analogWrite(ledPin, ledState);
