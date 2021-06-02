@@ -24,10 +24,10 @@ float lowTemp = 18.0;
 void setup() {
   // Open serial port at baud rate:
   Serial.begin(9600);
-}
-  
+
+
   Serial.println(F("DHTxx buffered test!"));
-  
+
   pinMode(ledPin, OUTPUT);
 
   dht.begin();
@@ -52,10 +52,11 @@ void loop() {
 
     delay(2000);
 
-  } while ( buffCont < BUFSZ );
+  } 
+  while ( buffCont < BUFSZ );
 
   buffCont = 0;
-  
+
 }
 
 void readDHTtoBuff(float* tBuff, float* hBuff) {
@@ -70,16 +71,16 @@ void readDHTtoBuff(float* tBuff, float* hBuff) {
 }
 
 void writeBufftoSerial(float* tBuff, float* hBuff) {
-    for (int i = 0; i < buffCont ; i++) {
-      Serial.print(2 * (buffCont - I) );
-      Serial.print(F(" Minutes ago "));
-      Serial.print(F("Temp "));
-      //Serial.print(i);
-      Serial.print(F(" = "));
-      Serial.print(tBuff[i]);
-      Serial.print(F("°C   Humidity = "));
-      Serial.print(hBuff[i]);
-      Serial.println(F("%"));
+  for (int i = 0; i < buffCont ; i++) {
+    Serial.print(2 * (buffCont - I) );
+    Serial.print(F(" Minutes ago "));
+    Serial.print(F("Temp "));
+    //Serial.print(i);
+    Serial.print(F(" = "));
+    Serial.print(tBuff[i]);
+    Serial.print(F("°C   Humidity = "));
+    Serial.print(hBuff[i]);
+    Serial.println(F("%"));
   }
 }
 
@@ -98,3 +99,4 @@ void doThermostat(float tNow) {
   }
   analogWrite(ledPin, ledState);
 }
+
