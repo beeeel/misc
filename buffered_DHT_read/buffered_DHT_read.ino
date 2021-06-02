@@ -72,7 +72,7 @@ void readDHTtoBuff(float* tBuff, float* hBuff) {
 
 void writeBufftoSerial(float* tBuff, float* hBuff) {
   for (int i = 0; i < buffCont ; i++) {
-    Serial.print(2 * (buffCont - I) );
+    Serial.print(2 * (buffCont - i) );
     Serial.print(F(" Minutes ago "));
     Serial.print(F("Temp "));
     //Serial.print(i);
@@ -89,7 +89,7 @@ void doThermostat(float tNow) {
   {
     ledState = 128;
   }
-  elseif (tNow > lowTemp)
+  else if (tNow > lowTemp)
   {
     ledState = 64;
   }
@@ -99,4 +99,3 @@ void doThermostat(float tNow) {
   }
   analogWrite(ledPin, ledState);
 }
-
