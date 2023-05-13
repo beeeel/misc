@@ -71,6 +71,14 @@ void CloseFile()
   strBuf[11] = 13;
   Tee(strBuf, 12);
 
+  Tee(*"WRF ", 4); 
+  TeeInt(11);
+  strBuf[0] = 13;
+  Tee(strBuf, 1);
+  
+  Tee(*"V1, V2, VG", 10);
+  Tee(strBuf, 1);
+
   //usb.print("CLF LOG.CSV");  // it closes the file
   //usb.print(13);       // return character
   digitalWrite(CTSPin, LOW);
@@ -90,17 +98,32 @@ void WriteLine()
       x /= 10;
     }
 
-    noOfChars += 7;                  // Need to also write temp XX, hum XX, 2 "," and CR
-
+    x = gateVolt[i] > 99 ? 3 : gateVolt[i] > 9 ? 2 : 1; // Thank me later
+    
+    noOfChars += 15+x;                  // Need to also write "XX.XX, XX.XX, XXX" and CR (V1, V2, VG)
+ 
     Tee(*"WRF ", 4);                //write to file (file needs to have been opened to write first)
     TeeInt(noOfChars);              //needs to then be told how many characters will be written
     strBuf[0] = 13;
     Tee(strBuf, 1);                 //return to say command is finished
+    
     TeeInt(valToWrite);
     Tee(*",", 1);
-    TeeInt((int)(V1Buff[i]));
+
+    valToWrite = (int)(V1Buff[i]); // Get the whole volts
+    TeeInt(valToWrite);
+    valToWrite = (int)(V1Buff[i] * 100) - valToWrite; // Get 2dp
+    TeeInt(valToWrite);
     Tee(*",", 1);
-    TeeInt((int)(V2Buff[i]));
+    
+    valToWrite = (int)(V2Buff[i]); // Get the whole volts
+    TeeInt(valToWrite);
+    valToWrite = (int)(V2Buff[i] * 100) - valToWrite; // Get 2dp
+    TeeInt(valToWrite);
+    Tee(*",", 1);
+
+    TeeInt(gateVolt[i]);
+    
     strBuf[0] = 13;
     Tee(strBuf, 1);                 //write a return to the contents of the file (so each entry appears on a new line)   
 
