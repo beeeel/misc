@@ -5,7 +5,7 @@ void setup() {
   // Open serial port at baud rate:
   Serial.begin(9600);
 
-  Serial.println(F("Potentiostat buffered write test!"));
+  Serial.println(F("DHTxx buffered write test!"));
 
   pinMode(gatePin, OUTPUT);
 
@@ -20,6 +20,7 @@ void setup() {
 
   usb.print("IPA"); // Set to ascii mode.
   usb.write(13);
+
 }
 
 void loop() {
@@ -33,16 +34,22 @@ void loop() {
   // Get readings into buffer
   buffCont = 0;
   do {
+    x = millis()/1000; // Time now in s
+    
     readVoltstoBuff(&V1Buff[buffCont], &V2Buff[buffCont]);
     doVoltostat(V1Buff[buffCont], V2Buff[buffCont]);
-    x = millis()/1000; // Time now in s
-    if ((x%TLOG) == 0) // If we're on a logging interval (to nearest second)
-    {  
+    //Serial.println("Did a reading");
+    if (x > lastLogTime + TLOG) // If we're on a logging interval (to nearest second)
+    {
       buffCont += 1;
+      lastLogTime = x;
+      //Serial.println("Buffered a reading");
     }
     else
     {
-      delay(1000);
+      //delayMicroseconds(TPOLL*1e6); // Time between readings in us
+      delay(TPOLL); // Time between readings in ms
+      //Serial.println("Waited");
     }
   } while ( buffCont < BUFSZ );
 
@@ -53,9 +60,9 @@ void loop() {
 
   writeBufftoSerial(V1Buff, V2Buff);
 
-  OpenFile();
-  WriteLine();
-  CloseFile();
+  //OpenFile();
+  //WriteLine();
+  //CloseFile();
 
 
 }
@@ -112,14 +119,14 @@ void CheckSerial() {
   }
 }
 
-void writeBufftoSerial(float* tBuff, float* hBuff, float* ) {
+void writeBufftoSerial(float* tBuff, float* hBuff) {
   for (int i = 0; i < BUFSZ; i++) {
     Serial.print(F("V1 "));
     Serial.print(i);
     Serial.print(F(" = "));
     Serial.print(tBuff[i]);
-    Serial.print(F("°C   Humidity = "));
+    Serial.print(F("V   V2 = "));
     Serial.print(hBuff[i]);
-    Serial.println(F("%"));
+    Serial.println(F("V"));
   }
 }
