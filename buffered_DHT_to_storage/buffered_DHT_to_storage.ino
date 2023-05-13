@@ -5,7 +5,7 @@ void setup() {
   // Open serial port at baud rate:
   Serial.begin(9600);
 
-  Serial.println(F("DHTxx buffered write test!"));
+  Serial.println(F("Potentiostat buffered write test!"));
 
   pinMode(gatePin, OUTPUT);
 
@@ -33,16 +33,16 @@ void loop() {
   // Get readings into buffer
   buffCont = 0;
   do {
+    readVoltstoBuff(&V1Buff[buffCont], &V2Buff[buffCont]);
+    doVoltostat(V1Buff[buffCont], V2Buff[buffCont]);
     x = millis()/1000; // Time now in s
-    if (x%TLOG) == 0 // If we're on a logging interval (to nearest second)
-    {
-      readVoltstoBuff(&V1Buff[buffCont], &V2Buff[buffCont]);
-      doVoltostat(V1Buff[buffCont], V2Buff[buffCont]);
+    if ((x%TLOG) == 0) // If we're on a logging interval (to nearest second)
+    {  
       buffCont += 1;
     }
     else
     {
-      delay(1000); // Time between readings in ms
+      delay(1000);
     }
   } while ( buffCont < BUFSZ );
 
@@ -112,9 +112,9 @@ void CheckSerial() {
   }
 }
 
-void writeBufftoSerial(float* tBuff, float* hBuff) {
+void writeBufftoSerial(float* tBuff, float* hBuff, float* ) {
   for (int i = 0; i < BUFSZ; i++) {
-    Serial.print(F("Temperature "));
+    Serial.print(F("V1 "));
     Serial.print(i);
     Serial.print(F(" = "));
     Serial.print(tBuff[i]);

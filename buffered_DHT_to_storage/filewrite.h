@@ -28,7 +28,7 @@ void SendToUsbTermCmd() {
 
 }
 
-void Tee(char* val[], int nChar) {
+void Tee(char** val, int nChar) {
   // Assume it's fine to write to USB and serial
   for (int i = 0; i < nChar; i++)
   {
@@ -37,7 +37,7 @@ void Tee(char* val[], int nChar) {
   }
 }
 
-void Buff(char* str[], int nChar) {
+void Buff(char** str, int nChar) {
   for (int i = 0; i < nChar; i++)
   {
     strBuf[i] = str[i];
@@ -54,8 +54,8 @@ void OpenFile()
 {
   while (digitalRead(RTSPin) == HIGH) { }
   // This next bit is horrible: The address-of turns the const char into char ** with only a warning from compile.
-  Buff(*"OPW LOG.CSV", 11);
-  strBuf[11] = 13;
+  Buff((char **) "OPW LOG.CSV", 11);
+  strBuf[11] = (char *) 13;
   Tee(strBuf, 12);
 
   //usb.print("OPW LOG.CSV");               // open to write creates a file or appends to existing
@@ -67,8 +67,8 @@ void OpenFile()
 void CloseFile()
 {
   while (digitalRead(RTSPin) == HIGH) { }
-  Buff(*"CLF LOG.CSV", 11);
-  strBuf[11] = 13;
+  Buff((char **) "CLF LOG.CSV", 11);
+  strBuf[11] = (char *) 13;
   Tee(strBuf, 12);
 
   //usb.print("CLF LOG.CSV");  // it closes the file
@@ -92,16 +92,16 @@ void WriteLine()
 
     noOfChars += 7;                  // Need to also write temp XX, hum XX, 2 "," and CR
 
-    Tee(*"WRF ", 4);                //write to file (file needs to have been opened to write first)
+    Tee((char **) "WRF ", 4);                //write to file (file needs to have been opened to write first)
     TeeInt(noOfChars);              //needs to then be told how many characters will be written
-    strBuf[0] = 13;
+    strBuf[0] = (char *) 13;
     Tee(strBuf, 1);                 //return to say command is finished
     TeeInt(valToWrite);
-    Tee(*",", 1);
+    Tee((char **) ",", 1);
     TeeInt((int)(V1Buff[i]));
-    Tee(*",", 1);
+    Tee((char **) ",", 1);
     TeeInt((int)(V2Buff[i]));
-    strBuf[0] = 13;
+    strBuf[0] = (char *) 13;
     Tee(strBuf, 1);                 //write a return to the contents of the file (so each entry appears on a new line)   
 
     digitalWrite(CTSPin, LOW);
