@@ -1,5 +1,5 @@
-int tLast, tNow;
-bool flowState;
+volatile int tLast, tNow;
+volatile bool flowState;
 int motorPin = 10;
 
 void setup() {
