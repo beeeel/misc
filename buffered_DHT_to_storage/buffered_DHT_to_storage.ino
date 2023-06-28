@@ -5,12 +5,20 @@ void setup() {
   // Open serial port at baud rate:
   Serial.begin(9600);
 
-  Serial.println(F("DHTxx buffered write test!"));
+  Serial.println(F("Solar regulator and flow sensor"));
 
-  pinMode(gatePin, OUTPUT);
+  
 
+  // Solar sensor pins
   pinMode(V1Pin, INPUT);
   pinMode(V2Pin, INPUT);
+  // Solar regulator pin
+  pinMode(gatePin, OUTPUT);
+  // Flow sensor pin
+  pinMode(FlowPin, INPUT);
+  // Pump power pin
+  pinMode(PumpPin, OUTPUT);
+  // SoftwareSerial pins
   pinMode(RTSPin, INPUT);
   pinMode(CTSPin, OUTPUT);
 
@@ -38,6 +46,8 @@ void loop() {
     
     readVoltstoBuff(&V1Buff[buffCont], &V2Buff[buffCont]);
     doVoltostat(V1Buff[buffCont], V2Buff[buffCont]);
+
+    checkFlow();
     //Serial.println("Did a reading");
     if (x > lastLogTime + TLOG) // If we're on a logging interval (to nearest second)
     {
@@ -127,6 +137,8 @@ void writeBufftoSerial(float* tBuff, float* hBuff) {
     Serial.print(tBuff[i]);
     Serial.print(F("V   V2 = "));
     Serial.print(hBuff[i]);
-    Serial.println(F("V"));
+    Serial.print(F("V, Flow = "));
+    Serial.print(flowBuff[i]);
+    Serial.println("V.");
   }
 }

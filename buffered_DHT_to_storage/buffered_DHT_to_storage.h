@@ -7,24 +7,45 @@
 
 // Number of readings to buffer
 #define BUFSZ 1
-// Working variables
+// Voltage regulator variables
 float V1Buff[BUFSZ];
 float V2Buff[BUFSZ];
 int gateVolt[BUFSZ];
 float vNow, tmp1, tmp2;
 int buffCont = 0;
 
+// Flow sensor log
+float flowBuff[BUFSZ];
+float flowLo = 0.5; // Turn on pump if input voltage is between Lo and Hi values.
+float flowHi = 4;   // 
 
-// Relays are on pins 5 to 8
+// Regulator output pin
 const int gatePin = 3;
 int gateState = 250;
+// Voltostat - you will need to figure out how to calculate the output voltage in the function below
+float highVolt = 29.72;// 31.45;
 
 // Voltage input pins - set to A0 and A1
 const int V1Pin = 14;
 const int V2Pin = 15;
+// Flow sensor input pin - set to A3
+const int FlowPin = 17;
+// Pump power pin and setting
+const int PumpPin = 5;
+const int PumpPower = 255; 
 
-// Voltostat - you will need to figure out how to calculate the output voltage in the function below
-float highVolt = 29.72;// 31.45;
+void checkFlow()
+{
+  flowBuff[buffCont] = ( (float) analogRead(flowPin) ) * 5 / 1023;
+  if ( ( flowBuff[buffCont] > flowLo ) & ( flowBuff[buffCont] < flowHi ) )
+  {
+    analogWrite(PumpPin, PumpPower);
+  }
+  else
+  {
+    analogWrite(PumpPin, 0);
+  }
+}
 
 
 void readVoltstoBuff(float* V1Buff, float* V2Buff) {
