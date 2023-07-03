@@ -36,7 +36,7 @@ const int PumpPower = 255;
 
 void checkFlow()
 {
-  flowBuff[buffCont] = ( (float) analogRead(flowPin) ) * 5 / 1023;
+  flowBuff[buffCont] = ( (float) analogRead(FlowPin) ) * 5 / 1023;
   if ( ( flowBuff[buffCont] > flowLo ) & ( flowBuff[buffCont] < flowHi ) )
   {
     analogWrite(PumpPin, PumpPower);
